@@ -60,10 +60,9 @@ Texto deintrodução
 
 ## DNS 
 
-#### Master
+### Configuração do Bind9 (DNS Server)
 
-## Configuração do Bind9 (DNS Server)
-   
+#### Master
 
    **1. Vamos instalar o bind9 via apt-get**
    _Primeiro faremos o update depois instalamos o samba_
@@ -81,7 +80,7 @@ sudo systemctl status bind9
 sudo systemctl enable bind9
 ```
 
-## Diretórios do bind
+### Diretórios do bind
    * Os arquivos do bind ficam na no diretório **/etc/bind**.
    * para verificar digite 
 ```bash
@@ -110,7 +109,7 @@ drwxr-xr-x 94 root root 4096 Oct  8 23:29 ..
 ![ls -la]()
 
 
-### Zonas
+#### Zonas
    * As zonas são especificadas em arquivos **db**. Vamos criar um diretório para armazendar os arquivos de zonas, que sera o diretório ***/etc/bind/zones***  
    
    2. Vamos criar o diretório zones para adicionar os arquivos "db" dentro de /etc/bind.
@@ -148,9 +147,9 @@ sudo cp /etc/bind/db.127 /etc/bind/zones/db.10.9.14.rev
    * Assim, o arquivo **db.10.9.14.rev** conterá a zona reversa da rede 10.9.14.0 
 
    
-### Editar arquivos db:
+#### Editar arquivos db:
 
-   #### zona direta: db.ifalara.local
+   ##### zona direta: db.ifalara.local
    * edite o arquivo  **db.ifalara.local** para adcionar as informações do seu domínio
       * As linhas iniciadas com **;** são comentários 
       
@@ -184,7 +183,7 @@ gw.grupo4.ifalara.local.	  IN 	A	10.9.14.108
 ![db.ifalara.local]()
 
 
-   #### zona reversa: db.10.9.14.rev
+   ##### zona reversa: db.10.9.14.rev
    * edite o arquivo **db.10.9.14.rev** para adcionar as informações da zona reversa
       * As linhas iniciadas com **;** são comentários.
 
@@ -217,7 +216,7 @@ $TTL    604800
 ```
 ![db.10.9.14.rev]()
 
-   ### Configuração do named.conf.local
+   #### Configuração do named.conf.local
    * Para ativar as zonas descritas nos arquivos **db** deve-se editar o arquivo de configuracão do bind para informar onde eles foram salvos. As zonas são adicionadas em **/etc/bind/named.conf.local**.
    
 ```bash
@@ -251,7 +250,7 @@ zone "14.9.10.in-addr.arpa" IN {
 ![nano /etc/bind/named.conf.local]()
 
 
-   ### Verificação de sintaxe 
+   #### Verificação de sintaxe 
    
    * Para checar a sintaxe de configuração do BIND deve-se executar o comando named-checkconf. Este scritp checa os arquivos /etc/bind/named.conf.local.*
 
@@ -259,7 +258,7 @@ zone "14.9.10.in-addr.arpa" IN {
 sudo named-checkconf
 ```
 
-   ###  Verificar a sintaxe dos arquivos de dados
+   ####  Verificar a sintaxe dos arquivos de dados
    
    * Para verificar se a formatação da sintaxe dos arquivos db está correta, utiliza-se o script named-checkconf da seguinte forma: 
    
@@ -292,7 +291,7 @@ OK
 ![named.conf.local]()
 
 
-### Configure para somente resolver endereços IPv4
+#### Configure para somente resolver endereços IPv4
 
 ```bash
 sudo nano /etc/default/named
@@ -310,13 +309,13 @@ OPTIONS="-4 -u bind"
 ```
 ![nano /etc/bind/named.conf.local]()
 
-### Vamos reiniciar o BIND 
+#### Vamos reiniciar o BIND 
 
 ```bash
 sudo systemctl restart bind9
 ```
 
-### Configuração dos clientes
+#### Configuração dos clientes
    * Configure o DNS na máquina ns1, adicionando o IP no campo adresses de name server, onde estava o IP do google, interface de rede local (ens160).
 
 
@@ -324,7 +323,7 @@ sudo systemctl restart bind9
             nameservers: 
                 addresses:
                 - 10.9.14.10
-                search: [grupo4.ifalara.local]
+                search: [grupo4.turma914.ifalara.local]
 ```
   
    * O arquivo de configuração do netplan ficará da seguinte forma:
@@ -346,7 +345,7 @@ network:
         - 10.9.14.109             # IP do ns2 (filipe)
         - 10.9.14.108             # IP do gw (elias)
         - 10.9.14.103             # IP do smb (bruno)
-        search: [pedro_filipe_194.labredes.ifalarapiraca.local]  # domínio
+        search: [grupo4.turma914.ifalara.local]  # domínio
     ens192:                           
       addresses: [192.168.0.201/25] # IP e Máscara de interface externa.
       nameservers:
@@ -362,9 +361,9 @@ network:
 
    * O campo search indica o nome do domínio no qual a máquina pertence.
    
-### Testando o servidor DNS:
+#### Testando o servidor DNS:
 
-#### Teste de configuração como cliente. 
+##### Teste de configuração como cliente. 
    * Observe se os campos **DNS servers** e **DNS Domain** estão corretos.
   
 ```bash
@@ -411,15 +410,159 @@ MulticastDNS setting: no
 ```
 ![systemd-resolve]()
 
-   ### Para finalizar é só ver se o nosso serviço DNS resolve o DNS do Google
+   #### Para finalizar é só ver se o nosso serviço DNS resolve o DNS do Google
   
 ```bash
 ping google.com
 ```
-> Parte 2 a imagem
 ![ping google.com]()
 
+---
+
 #### Slave
+
+* O primeiro passo é usar o DNS Master para fazer o ns2 acessar a Internet. Para isso configure a interface de rede com o netplan
+
+```base
+sudo nano /etc/netplan/00-installer-config.yaml 
+```
+* Exemplo para a turma 914, para a turma 924 basta utilizar o prefixo de rede 10.9.24
+```
+network:
+    ethernets:
+        ens160:                        # interface local
+            addresses: [10.9.14.11/24]  # ip/mascara
+            gateway4: 10.9.14.1         # ip do gateway
+            dhcp4: false               # 'false' para conf. estatica 
+            nameservers:               # servidores dns
+                addresses:
+                - 10.9.14.10            # ip do ns1
+                - 10.9.14.11            # ip do ns2
+                search: [labredes.ifalarapiraca.local]  # domínio
+    version: 2
+```
+![00-installer-config(ns2)]()
+
+   * Aplique as configurações
+```bash
+sudo netplan apply
+``` 
+   * veja se funcionou
+```bash
+ifconfig
+```
+![ifconfig(ns2)]()
+
+#### Configurar e instalar servidor DNS secundário (slave)
+```bash
+sudo apt-get install bind9 dnsutils bind9-doc -y
+```
+
+
+   * Verifique o status do serviço:
+```bash
+sudo systemctl status bind9
+```
+   * Se não estiver rodando:
+```bash
+sudo systemctl enable bind9
+```
+Aqui já estava rodando
+
+![status_bind9(ns2)]()
+
+#### configuração de zonas
+
+```bash
+sudo nano /etc/bind/named.conf.local
+```
+```
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "grupo4.turma914.ifalara.local" {
+        type slave;
+        file "/etc/bind/zones/db.ifalara.local";
+        masters { 10.9.14.126; };
+};
+
+zone "14.9.10.in-addr.arpa" IN {
+        type slave;
+        file "/etc/bind/zones/db.10.9.14.rev";
+        masters { 10.9.14.126; };
+};
+```
+![named.conf.local(ns2)]()
+
+#### Checagem de sintaxe
+
+```bash
+sudo named-checkconf
+```
+![named-checkconf(ns2)]()
+#### Testando o servidor DNS:
+
+##### Teste de configuração como cliente. 
+   * Observe se os campos **DNS servers** e **DNS Domain** estão corretos.
+  
+```bash
+systemd-resolve --status
+```
+```
+RESULTADO
+Global
+       LLMNR setting: no
+MulticastDNS setting: no
+  DNSOverTLS setting: no
+      DNSSEC setting: no
+    DNSSEC supported: no
+
+Link 2 (ens160)
+      Current Scopes: DNS
+DefaultRoute setting: yes
+       LLMNR setting: yes
+MulticastDNS setting: no
+  DNSOverTLS setting: no
+      DNSSEC setting: no
+    DNSSEC supported: no
+  Current DNS Server: 10.9.14.126
+         DNS Servers: 10.9.14.126
+                      10.9.14.109
+                      10.9.14.108
+                      10.9.14.103
+          DNS Domain: grupo4.turma914.ifalara.local
+
+Link 3 (ens192)
+      Current Scopes: DNS
+DefaultRoute setting: yes
+       LLMNR setting: yes
+MulticastDNS setting: no
+  DNSOverTLS setting: no
+      DNSSEC setting: no
+    DNSSEC supported: no
+  Current DNS Server: 192.168.14.27
+         DNS Servers: 192.168.14.25
+                      192.168.14.26
+                      192.168.14.27
+                      192.168.14.28
+          DNS Domain: grupo4.turma914.ifalara.local
+```
+![systemd-resolve(ns2)]()
+
+   #### Para finalizar é só ver se o nosso serviço DNS resolve o DNS do Google
+  
+```bash
+ping google.com
+```
+
+![ping google.com(ns2)]()
+
+---
 
 ## Página Web e Banco de Dados
 
