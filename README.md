@@ -106,7 +106,7 @@ drwxr-xr-x 94 root root 4096 Oct  8 23:29 ..
 -rw-r--r--  1 root root 1317 Aug  7 14:43 zones.rfc1918
 ```
 
-![ls -la]()
+![ls -la](ls_-la_bind.PNG)
 
 
 #### Zonas
@@ -141,7 +141,7 @@ sudo cp /etc/bind/db.empty /etc/bind/zones/db.ifalara.local
 ```bash
 sudo cp /etc/bind/db.127 /etc/bind/zones/db.10.9.14.rev
 ```
-![cp]()
+![cp](cp.PNG)
 
 
    * Assim, o arquivo **db.10.9.14.rev** conterá a zona reversa da rede 10.9.14.0 
@@ -180,7 +180,7 @@ ns2.grupo4.ifalara.local.	  IN	A	10.9.14.109
 smb.grupo4.ifalara.local.	  IN	A	10.9.14.103
 gw.grupo4.ifalara.local.	  IN 	A	10.9.14.108
 ```
-![db.ifalara.local]()
+![db.ifalara.local](ifalara_local.PNG)
 
 
    ##### zona reversa: db.10.9.14.rev
@@ -214,7 +214,7 @@ $TTL    604800
 103     IN      PTR     smb.grupo4.turma914.ifalara.local.      ; 10.9.14.103
 108     IN      PTR     gw.grupo4.turma914.ifalara.local.       ; 10.9.14.108
 ```
-![db.10.9.14.rev]()
+![db.10.9.14.rev](db.10.9.14.rev(ns1).PNG)
 
    #### Configuração do named.conf.local
    * Para ativar as zonas descritas nos arquivos **db** deve-se editar o arquivo de configuracão do bind para informar onde eles foram salvos. As zonas são adicionadas em **/etc/bind/named.conf.local**.
@@ -247,8 +247,7 @@ zone "14.9.10.in-addr.arpa" IN {
         allow-transfer{ 10.9.14.126; };
 };
 ```
-![nano /etc/bind/named.conf.local]()
-
+![named.conf.local](named.conf_local.PNG)
 
    #### Verificação de sintaxe 
    
@@ -288,7 +287,7 @@ RESULTADO
 zone 14.9.10.in-addr.arpa/IN: loaded serial 1
 OK
 ```
-![named.conf.local]()
+![named-checkconf](named-checkconf.PNG)
 
 
 #### Configure para somente resolver endereços IPv4
@@ -307,7 +306,7 @@ RESOLVCONF=no
 # startup options for the server
 OPTIONS="-4 -u bind"
 ```
-![nano /etc/bind/named.conf.local]()
+![named](named.PNG)
 
 #### Vamos reiniciar o BIND 
 
@@ -357,154 +356,10 @@ network:
         search: [grupo4.turma914.ifalara.local]
     version: 2
 ```
-![nano /etc/bind/00-installer-config.yaml]()
+![00-installer-config.yaml](00-installer-config.PNG)
 
    * O campo search indica o nome do domínio no qual a máquina pertence.
    
-#### Testando o servidor DNS:
-
-##### Teste de configuração como cliente. 
-   * Observe se os campos **DNS servers** e **DNS Domain** estão corretos.
-  
-```bash
-systemd-resolve --status ens160
-```
-```
-RESULTADO
-Global
-       LLMNR setting: no
-MulticastDNS setting: no
-  DNSOverTLS setting: no
-      DNSSEC setting: no
-    DNSSEC supported: no
-
-Link 2 (ens160)
-      Current Scopes: DNS
-DefaultRoute setting: yes
-       LLMNR setting: yes
-MulticastDNS setting: no
-  DNSOverTLS setting: no
-      DNSSEC setting: no
-    DNSSEC supported: no
-  Current DNS Server: 10.9.14.126
-         DNS Servers: 10.9.14.126
-                      10.9.14.109
-                      10.9.14.108
-                      10.9.14.103
-          DNS Domain: grupo4.turma914.ifalara.local
-
-Link 3 (ens192)
-      Current Scopes: DNS
-DefaultRoute setting: yes
-       LLMNR setting: yes
-MulticastDNS setting: no
-  DNSOverTLS setting: no
-      DNSSEC setting: no
-    DNSSEC supported: no
-  Current DNS Server: 192.168.14.27
-         DNS Servers: 192.168.14.25
-                      192.168.14.26
-                      192.168.14.27
-                      192.168.14.28
-          DNS Domain: grupo4.turma914.ifalara.local
-```
-![systemd-resolve]()
-
-   #### Para finalizar é só ver se o nosso serviço DNS resolve o DNS do Google
-  
-```bash
-ping google.com
-```
-![ping google.com]()
-
----
-
-#### Slave
-
-* O primeiro passo é usar o DNS Master para fazer o ns2 acessar a Internet. Para isso configure a interface de rede com o netplan
-
-```base
-sudo nano /etc/netplan/00-installer-config.yaml 
-```
-* Exemplo para a turma 914, para a turma 924 basta utilizar o prefixo de rede 10.9.24
-```
-network:
-    ethernets:
-        ens160:                        # interface local
-            addresses: [10.9.14.11/24]  # ip/mascara
-            gateway4: 10.9.14.1         # ip do gateway
-            dhcp4: false               # 'false' para conf. estatica 
-            nameservers:               # servidores dns
-                addresses:
-                - 10.9.14.10            # ip do ns1
-                - 10.9.14.11            # ip do ns2
-                search: [labredes.ifalarapiraca.local]  # domínio
-    version: 2
-```
-![00-installer-config(ns2)]()
-
-   * Aplique as configurações
-```bash
-sudo netplan apply
-``` 
-   * veja se funcionou
-```bash
-ifconfig
-```
-![ifconfig(ns2)]()
-
-#### Configurar e instalar servidor DNS secundário (slave)
-```bash
-sudo apt-get install bind9 dnsutils bind9-doc -y
-```
-
-
-   * Verifique o status do serviço:
-```bash
-sudo systemctl status bind9
-```
-   * Se não estiver rodando:
-```bash
-sudo systemctl enable bind9
-```
-Aqui já estava rodando
-
-![status_bind9(ns2)]()
-
-#### configuração de zonas
-
-```bash
-sudo nano /etc/bind/named.conf.local
-```
-```
-//
-// Do any local configuration here
-//
-
-// Consider adding the 1918 zones here, if they are not used in your
-// organization
-//include "/etc/bind/zones.rfc1918";
-
-zone "grupo4.turma914.ifalara.local" {
-        type slave;
-        file "/etc/bind/zones/db.ifalara.local";
-        masters { 10.9.14.126; };
-};
-
-zone "14.9.10.in-addr.arpa" IN {
-        type slave;
-        file "/etc/bind/zones/db.10.9.14.rev";
-        masters { 10.9.14.126; };
-};
-```
-![named.conf.local(ns2)]()
-
-#### Checagem de sintaxe
-
-```bash
-sudo named-checkconf
-```
-![named-checkconf(ns2)]()
 #### Testando o servidor DNS:
 
 ##### Teste de configuração como cliente. 
@@ -552,7 +407,151 @@ MulticastDNS setting: no
                       192.168.14.28
           DNS Domain: grupo4.turma914.ifalara.local
 ```
-![systemd-resolve(ns2)]()
+![systemd-resolve(ns1)](systemd-resolve(ns1).PNG)
+
+   #### Para finalizar é só ver se o nosso serviço DNS resolve o DNS do Google
+  
+```bash
+ping google.com
+```
+![ping google.com](pingGoogle(ns1).PNG)
+
+---
+
+#### Slave
+
+* O primeiro passo é usar o DNS Master para fazer o ns2 acessar a Internet. Para isso configure a interface de rede com o netplan
+
+```base
+sudo nano /etc/netplan/00-installer-config.yaml 
+```
+* Exemplo para a turma 914, para a turma 924 basta utilizar o prefixo de rede 10.9.24
+```
+network:
+    ethernets:
+        ens160:                        # interface local
+            addresses: [10.9.14.11/24]  # ip/mascara
+            gateway4: 10.9.14.1         # ip do gateway
+            dhcp4: false               # 'false' para conf. estatica 
+            nameservers:               # servidores dns
+                addresses:
+                - 10.9.14.10            # ip do ns1
+                - 10.9.14.11            # ip do ns2
+                search: [labredes.ifalarapiraca.local]  # domínio
+    version: 2
+```
+![00-installer-config(ns2)](00-installer-config(ns2).PNG)
+
+   * Aplique as configurações
+```bash
+sudo netplan apply
+``` 
+   * veja se funcionou
+```bash
+ifconfig
+```
+![ifconfig(ns2)](ifconfig(ns2).PNG)
+
+#### Configurar e instalar servidor DNS secundário (slave)
+```bash
+sudo apt-get install bind9 dnsutils bind9-doc -y
+```
+
+
+   * Verifique o status do serviço:
+```bash
+sudo systemctl status bind9
+```
+   * Se não estiver rodando:
+```bash
+sudo systemctl enable bind9
+```
+Aqui já estava rodando
+
+![status_bind9(ns2)](status_bind9(ns2).PNG)
+
+#### configuração de zonas
+
+```bash
+sudo nano /etc/bind/named.conf.local
+```
+```
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "grupo4.turma914.ifalara.local" {
+        type slave;
+        file "/etc/bind/zones/db.ifalara.local";
+        masters { 10.9.14.126; };
+};
+
+zone "14.9.10.in-addr.arpa" IN {
+        type slave;
+        file "/etc/bind/zones/db.10.9.14.rev";
+        masters { 10.9.14.126; };
+};
+```
+![named.conf.local(ns2)](named.conf_local(ns2).PNG)
+
+#### Checagem de sintaxe
+
+```bash
+sudo named-checkconf
+```
+![named-checkconf(ns2)](named-checkconf(ns2).PNG)
+#### Testando o servidor DNS:
+
+##### Teste de configuração como cliente. 
+   * Observe se os campos **DNS servers** e **DNS Domain** estão corretos.
+  
+```bash
+systemd-resolve --status
+```
+```
+RESULTADO
+Global
+       LLMNR setting: no
+MulticastDNS setting: no
+  DNSOverTLS setting: no
+      DNSSEC setting: no
+    DNSSEC supported: no
+
+Link 2 (ens160)
+      Current Scopes: DNS
+DefaultRoute setting: yes
+       LLMNR setting: yes
+MulticastDNS setting: no
+  DNSOverTLS setting: no
+      DNSSEC setting: no
+    DNSSEC supported: no
+  Current DNS Server: 10.9.14.126
+         DNS Servers: 10.9.14.126
+                      10.9.14.109
+                      10.9.14.108
+                      10.9.14.103
+          DNS Domain: grupo4.turma914.ifalara.local
+
+Link 3 (ens192)
+      Current Scopes: DNS
+DefaultRoute setting: yes
+       LLMNR setting: yes
+MulticastDNS setting: no
+  DNSOverTLS setting: no
+      DNSSEC setting: no
+    DNSSEC supported: no
+  Current DNS Server: 192.168.14.27
+         DNS Servers: 192.168.14.25
+                      192.168.14.26
+                      192.168.14.27
+                      192.168.14.28
+          DNS Domain: grupo4.turma914.ifalara.local
+```
+![systemd-resolve(ns2)](systemd-resolve(ns2).PNG)
 
    #### Para finalizar é só ver se o nosso serviço DNS resolve o DNS do Google
   
@@ -560,7 +559,7 @@ MulticastDNS setting: no
 ping google.com
 ```
 
-![ping google.com(ns2)]()
+![ping google.com(ns2)](pingGoogle(ns2).PNG)
 
 ---
 
