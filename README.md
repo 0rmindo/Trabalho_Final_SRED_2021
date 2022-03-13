@@ -95,7 +95,7 @@ Texto deintrodução
 ---
 
 
-### 1 - Como primeiro devemos instalar o bind9.
+### 1 - Como primeiro passo devemos instalar o bind9.
 
   Mas primeiro vamos fazer um update:
   
@@ -121,7 +121,7 @@ Texto deintrodução
 
 ### 2 - Vamos configurar os arquivos de zonas.
 
-  Mas primeiro vamos criar o diretorio zones para alocar os nossos arquivos de zonas, com: 
+  Antes vamos criar o diretorio zones para alocar os nossos arquivos de zonas e seguir o padrão, com: 
   
   ```
   $ sudo mkdir /etc/bind/zones
@@ -349,7 +349,7 @@ Texto deintrodução
     version: 2
   ```
   
-  ![00_installer_config](00_installer_config.PNG)
+  ![00_installer_config](/ns1/00_installer_config.PNG)
 
 ---
 
@@ -373,7 +373,7 @@ Texto deintrodução
   $ ping google.com
   ```
   
-  ![dig-system_resolve-ping](dig-system_resolve-ping.PNG)
+  ![dig-system_resolve-ping](/ns1/dig-system_resolve-ping.PNG)
 
 ---
 
@@ -438,7 +438,7 @@ Texto deintrodução
     version: 2
   ```
 
-  ![00-installer_config](00-installer_config.PNG)
+  ![00-installer_config](/ns2/00-installer_config.PNG)
 
   Para aplicar usamos:
   
@@ -452,7 +452,7 @@ Texto deintrodução
   $ ifconfig
   ```
   
-  ![ifconfig](ifconfig.PNG)
+  ![ifconfig](/ns2/ifconfig.PNG)
   
 ---
 
@@ -462,7 +462,7 @@ Texto deintrodução
   $ sudo systemctl status bind9
   ```
   
-  ![status_bind](status_bind.PNG)
+  ![status_bind](/ns2/status_bind.PNG)
 
   Agora vamos editar o o arquivo "named.conf.local" informando que esse é o DNS Slave e qual o ip e o arquivo de DNS do Master. 
   
@@ -496,7 +496,7 @@ Texto deintrodução
   };
   ```
   
-  ![named_conf_local](named_conf_local.PNG)
+  ![named_conf_local](/ns2/named_conf_local.PNG)
 
   Par verificar a sintax usamos:
   
@@ -520,7 +520,7 @@ E por fim testarmos se o nosso DNS está rtesolvendo o nome do google.
 $ ping google.com
 ```
 
-![systemd_resolve-ping](systemd_resolve-ping.PNG)
+![systemd_resolve-ping](/ns2/systemd_resolve-ping.PNG)
 
 --
 
@@ -759,7 +759,7 @@ $ ping google.com
   $ sudo hostnamectl set-hostname bd.grupo4.turma914.ifalara.local
   ```
   
-  (IMG: hostname.PNG)
+  ![hostname](/bd/hostname.PNG)
 
 ### 1 - Primeiro vamos configurar essa maquina como cliente do serviço DNS. Para isso vamos configurar as interfaces de rede e adicionar os IPs de DNS e o compo "search".
   
@@ -790,7 +790,7 @@ $ ping google.com
       version: 2
   ```
   
-  (IMG: installer_confing.PNG)
+  ![installer_confing](/bd/installer_confing.PNG)
 
   Em seguida vamos aplicar as alterações.
 
@@ -820,7 +820,7 @@ $ ping google.com
   $ ping google.com
   ```
   
-  (IMG: dig-system_resolve-ping.PNG)
+  ![dig-system_resolve-ping](/bd/dig-system_resolve-ping.PNG)
 
 --
 
