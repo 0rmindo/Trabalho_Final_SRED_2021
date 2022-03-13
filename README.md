@@ -38,8 +38,8 @@ Texto deintrodução
 | IP do SAMBA: | ens160 | 10.9.14.103 | ens192 |	192.168.14.26 |
 | IP do NS1: | ens160 | 10.9.14.126 | ens192 |	192.168.14.27 |
 | IP do NS2: | ens160 | 10.9.14.109 | ens192 |	192.168.14.28 |
-| IP do WEB | ens160 | 10.9.14.xxx | ens192 |	192.168.14.29 |
-| IP do BD | ens160 | 10.9.14.xxx | ens192 |	192.168.14.30 |
+| IP do WEB | ens160 | 10.9.14.217 | ens192 |	192.168.14.29 |
+| IP do BD | ens160 | 10.9.14.218 | ens192 |	192.168.14.30 |
 
 ### DEFINIÇÂO DE NOMES E DOMÍNIO (grupo4.turma914.ifalara.local):				
 
