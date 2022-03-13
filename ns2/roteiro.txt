@@ -1,0 +1,81 @@
+Agora vamos configurar o Dns Slave com os dominios corretos na maquina ns2.
+
+0- Primeiro vamos corrigir o nome da maquina, colocando de acordo com a planilha de acompanhamento;
+$ sudo hostnamectl set-hostname ns2.grupo4.turma914.ifalara.local
+
+1- Como primeiro devemos instalar o bind9.
+Mas primeiro vamos fazer um update:
+$ sudo apt update
+Agora vamos instalar o bind:
+$ sudo apt-get install bind9 dnsutils bind9-doc
+Em seguida vamos verificar se o Bind9 está funcionando:
+$ sudo systemctl status bind9
+---
+
+2- Vamos logo confugurar as interfaces de redes. Usamos:
+$ sudo nano /etc/netplan/00-installer-config.yaml
+# This is the network config written by 'subiquity'
+network:
+  ethernets:
+    ens160:
+      addresses: [10.9.14.109/24]
+      gateway4: 10.9.14.1
+      dhcp4: false
+      nameservers:
+        addresses:
+          - 10.9.14.126         # IP ns1 (pedro)
+          - 10.9.14.109         # IP ns2 (filipe)
+        search: [grupo4.turma914.ifalara.local]
+    ens192:
+      addresses: [192.168.14.28/29]
+      nameservers:
+        addresses:
+          - 192.168.14.25
+          - 192.168.14.26
+        search: [grupo4.turma914.ifalara.local]
+  version: 2
+-
+(IMG: 00-installer_config.PNG)
+Para aplicar usamos:
+$ sudo netplan apply
+Em seguida vamos verificar se está ok, com:
+$ ifconfig
+(IMG: ifconfig.PNG)
+
+3- Agora verificamos se o Bind esta rodando com:
+$ sudo systemctl status bind9
+(IMG: status_bind)
+Agora vamos editar o o arquivo "named.conf.local" informando que esse é o DNS Slave e qual o ip e o arquivo de DNS do Master. 
+Usamos o comando:
+$ sudo nano /etc/bind/named.conf.local
+RESULTADO
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "grupo4.turma914.ifalara.local" {
+        type slave;
+        file "/etc/bind/zones/db.ifalara.local";
+        masters { 10.9.14.126; };
+};
+
+zone "14.9.10.in-addr.arpa" IN {
+        type slave;
+        file "/etc/bind/zones/db.10.9.14.rev";
+        masters { 10.9.14.126; };
+};
+(IMG: named_conf_local.PNG)
+-
+Par verificar a sintax usamos:
+$ sudo named-checkconf
+Se não apareceu nem um erro então está ok.
+---
+4- Agora Vamos testar para ver se está funcionando, com:
+$ systemd-resolve --status
+E por fim testarmos se o nosso DNS está rtesolvendo o nome do google.
+$ ping google.com
+(IMG systemd_resolve-ping.PNG)

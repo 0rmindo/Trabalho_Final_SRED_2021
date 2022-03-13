@@ -1,0 +1,174 @@
+Nesta maquina "www" vamos configurar o servidor web usando a ferramenta Apache2 e configurar a maquina como cliente do serviço DNS. 
+
+### 0 - Primeiro vamos mudar o nome da maquina para o nome escolhhido que está na tabela:
+
+> www.grupo4.turma914.ifalara.local
+Com o comando:
+```
+$ sudo hostnamectl set-hostname ns2.grupo4.turma914.ifalara.local
+```
+---
+
+### 1 - Primeiro vamos configurar essa maquina como cliente do serviço DNS. Para isso vamos configurar as interfaces de rede e adicionar os IPs de DNS e o compo "search".
+
+Vamos entrar no arquivo de configuração:
+```
+$ sudo nano /etc/netplan/00-installer-config.yaml
+```
+**RESULTADO**
+```
+#This is the network config written by 'subiquity'
+network:
+    ethernets:
+        ens160:
+          dhcp4: false
+          addresses: [10.9.14.217/24]
+          gateway4: 10.9.14.1
+          nameservers:
+            addresses:
+               - 10.9.14.126
+               - 10.9.14.109
+            search: [grupo4.turma914.ifalara.local]
+        ens192:
+          dhcp4: false
+          addresses: [192.168.0.29/29]
+    version: 2
+```
+![](/www/installer_confing.PNG)
+
+Em seguida vamos aplicar as alterações.
+Para isso usamos:
+```
+$ sudo netplan apply
+```
+---
+
+### 2 - Agora vamos testar se está funcionando normalmente.
+
+```
+$ dig @10.9.14.126 gw.grupo4.turma914.ifalara.local
+```
+Na linha "ANSWER SECTION:" tem que aparecer que foi resolvido, com o dominio e o IP.
+
+Vamos usar o seguinte comando para verificar se a interface 160 está funcionando:
+```
+$ systemd-resolve --status ens160
+```
+
+Para finalizar vamos ver se o nosso serviço DNS revolve o DNS do google:
+$ ping google.com
+![](/www/dig-system_resolve-ping.PNG)
+---
+
+### 3 - Agora vomos instalar o apache e configurar para subir nosso servidor apacha.
+
+Primeiro vamos fazer um update na nossa maquina, via apt:
+```
+$ sudo apt update
+```
+
+Para instalar o apache2, versão que vamosusar, usamos:
+```
+$ sudo apt install apache2
+```
+Obs.: Não é necessário configurar o firewall, pois isso vai ser feito na maquina "gw".
+---
+
+### 4 - Vamos verificar se o servidor web está funcionando, usamos:
+
+```
+$ sudo systemctl status apache2
+```
+
+**RESULTADO**
+```
+● apache2.service - The Apache HTTP Server
+     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2022-03-08 12:30:50 UTC; 4 days ago
+       Docs: https://httpd.apache.org/docs/2.4/
+   Main PID: 3630 (apache2)
+      Tasks: 55 (limit: 1066)
+     Memory: 7.0M
+     CGroup: /system.slice/apache2.service
+             ├─  3630 /usr/sbin/apache2 -k start
+             ├─129424 /usr/sbin/apache2 -k start
+             └─129425 /usr/sbin/apache2 -k start
+
+Mar 08 12:30:50 www systemd[1]: Started The Apache HTTP Server.
+Mar 10 00:00:29 www systemd[1]: Reloading The Apache HTTP Server.
+Mar 10 00:00:29 www apachectl[51821]: AH00558: apache2: Could not reliably determine the serv>
+Mar 10 00:00:29 www systemd[1]: Reloaded The Apache HTTP Server.
+Mar 11 00:00:01 www systemd[1]: Reloading The Apache HTTP Server.
+Mar 11 00:00:01 www apachectl[95559]: AH00558: apache2: Could not reliably determine the serv>
+Mar 11 00:00:01 www systemd[1]: Reloaded The Apache HTTP Server.
+Mar 12 00:00:37 www systemd[1]: Reloading The Apache HTTP Server.
+Mar 12 00:00:37 www apachectl[129422]: AH00558: apache2: Could not reliably determine the ser>
+Mar 12 00:00:37 www systemd[1]: Reloaded The Apache HTTP Server.
+```
+![](/www/status_apache2.PNG)
+Para acessar o servidor web basta ir no navegador e colocar o IP da maquina "www", onde foi feito a instalação do Aopache2.
+Caso não saiba seu IP basta digitar:
+```
+$ hostname -i
+```
+Agora é só ir ao navegador e digitar o IP. Se o servidor web estiver rodando aparecerá uma pagina do Apache2.
+---
+
+### 5 - Agora vamos criar o nosso site.
+Primeiro criarmos um diretorio com o nome do nosso domínio, para isso usamos:
+```
+$ sudo mkdir /var/www/grupo4.turma914.ifalara.local
+```
+Agora atribuimos a propriedade do diretório com a variável de ambiente $USER:
+```
+$ sudo chown -R $USER:$USER /var/www/grupo4.turma914.ifalara.local
+```
+Agora vamos configurar as permições dos webs hosts, com:
+```
+$ sudo chmod -R 755 /var/www/grupo4.turma914.ifalara.local
+```
+Agora vomos criar e editar a pagina index.html:
+```
+$ sudo nano /var/www/gupo4.turma914.ifalara.local/index.html
+```
+Para que o Apache apresente a nossa página vamos criar um arquivo de configuração novo, com:
+```
+$ sudo nano /etc/apache2/sites-available/grupo4.turma914.ifalara.local.conf
+```
+Neste arquivo vamos colocar o seguinte bloco de cofigo:
+```
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    ServerName grupo4.turma914.ifalara.local
+    ServerAlias www.grupo4.turma914.ifalara.local
+    DocumentRoot /var/www/grupo4.turma914.ifalara.local
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+![](/www/domain_conf.PNG)
+
+Em segida vamos habilitar o arquivo com a ferramenta a2ensite:
+```
+$ sudo a2ensite grupo4.turma914.ifalara.local.conf
+```
+Vamos desabilitar o site padrão definido em 000-default.conf:
+```
+$ sudo a2dissite 000-default.conf
+```
+Em seguida, vamos testar à procura de erros de configuração:
+```
+$ sudo apache2ctl configtest
+```
+Vamos reiniciar o Apache com:
+```
+$ sudo systemctl restart apache2
+```
+Agora é só acessar novamente no navegador com o IP da maquina. 
+![](/www/a2ensite-configtest-restart.PNG)
+![](/www/site.PNG)
+
+
+
+
+
