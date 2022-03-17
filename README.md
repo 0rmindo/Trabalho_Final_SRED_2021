@@ -805,39 +805,10 @@ $ ping google.com
   ```
 
   > Obs.: O php já está funcionandop no servidor web
-
-### 2 - Vamos configurar o servidor com php
-
-  Vamos criar o arquivo "info.ph"
-
-  ```
-  $ sudo touch /var/www/html/info.php
-  ```
-
-  Vamos editar o arquivo info.php e adicionar a linha a segir
-
-  ```
-  <?php phpinfo(); ?>
-  ```
-
-  Para isso usamos o comando:
-
-  ```
-  $ sudo nano /var/www/html/info.php
-  ```
-
-### 3 - Vamos Testar
-
-  Para Acessar o site baasta digitar o IP da máquina "www", "/" e e o "nome_do_arquivo"
-
-  ```
-  http://10.9.14.217/info.php
-  ```
-   
-  ![site_info_php](/www/site_info_php.PNG)
   
-  --
-Nesta maquina "bd" vamos configurar o servidor de banco de dados usando a ferramenta MySQL e configurar a maquina como cliente do serviço DNS. 
+--
+
+Na maquina "bd" vamos configurar o servidor de banco de dados usando a ferramenta MySQL e configurar a maquina como cliente do serviço DNS. 
 
 ### 0 - Primeiro vamos mudar o nome da maquina para o nome escolhhido que está na tabela:
 
@@ -1057,8 +1028,6 @@ Success.
 
 All done! 
 ```
-
-![mysql_secure](/bd/mysql_secure.PNG)
 
 Vamos iniciar o MySQL
 
