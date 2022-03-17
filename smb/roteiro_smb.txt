@@ -1,0 +1,317 @@
+Vamos condigurar a maquina "smb" nela vamosadiconar a resolução de nomes e o serviço de compartilhamento de arquivos SAMBA.
+
+### 0 - Primeiro vamos mudar o nome da maquina para o nome escolhhido que está na tabela:
+
+> smb.grupo4.turma914.ifalara.local
+Com o comando:
+```
+$ sudo hostnamectl set-hostname smb.grupo4.turma914.ifalara.local
+```
+---
+
+### 1 - Primeiro vamos configurar essa maquina como cliente do serviço DNS. Para isso vamos configurar as interfaces de rede e adicionar os IPs de DNS e o compo "search".
+
+Vamos entrar no arquivo de configuração:
+```
+$ sudo nano /etc/netplan/00-install-config.yaml
+```
+**RESULTADO**
+```
+#This is the network config written by 'subiquity'
+network:
+    ethernets:
+        ens160:
+          dhcp4: false
+          addresses: [10.9.14.108/24]
+          gateway4: 10.9.14.1
+          nameservers:
+            addresses:
+               - 10.9.14.126
+               - 10.9.14.109
+            search: [grupo4.turma914.ifalara.local]
+        ens192:
+          dhcp4: false
+          addresses: [192.168.14.26/29]
+    version: 2
+```
+![install_confing](/www/install_confing.PNG)
+
+Em seguida vamos aplicar as alterações.
+Para isso usamos:
+```
+$ sudo netplan apply
+```
+---
+
+### 2 - Agora vamos testar se está funcionando normalmente.
+
+```
+$ dig @10.9.14.126 gw.grupo4.turma914.ifalara.local
+```
+Na linha "ANSWER SECTION:" tem que aparecer que foi resolvido, com o dominio e o IP.
+
+Vamos usar o seguinte comando para verificar se a interface 160 está funcionando:
+```
+$ systemd-resolve --status ens160
+```
+
+Para finalizar vamos ver se o nosso serviço DNS revolve o DNS do google:
+$ ping google.com
+![dig-system_resolve-ping](/www/dig-system_resolve-ping.PNG)
+---
+
+### 3 - Vamos instalar o Samba
+
+Sempre antes de instalar qualquer coisa e importante dar um update na maquina, então usamos:
+
+
+```
+$ sudo apt update
+```
+```
+$ sudo apt install samba 
+```
+
+Para ver o status usamos:
+
+```
+$  sudo systemctl status smbd
+```
+
+**RESULTADO**
+```
+
+```
+
+As portas TCP 445 e 136 estão rodando na nossa maquina 
+
+```
+$ netstat -an | grep LISTEN
+```
+```
+tcp        0      0 0.0.0.0:445             0.0.0.0:*               LISTEN     
+tcp        0      0 0.0.0.0:139             0.0.0.0:*               LISTEN   
+```
+
+Vamos fazer o backup do arquivo de configuração do samba e cria um arquivo novo
+
+```
+$  sudo cp /etc/samba/smb.conf{,.backup}
+```
+
+Para verificar se foi criado o novo arquivo
+
+```
+$ ls -la /etc/samba
+```
+
+**RESULTADO**
+```
+-rw-r--r--  1 root root 8942 Mar 22 20:55 smb.conf
+-rw-r--r--  1 root root 8942 Mar 23 01:42 smb.conf.backup
+```
+
+Agora usamos o comando grep para remover os comentarios dos arquivos
+
+```
+$ sudo bash -c 'grep -v -E "^#|^;" /etc/samba/smb.conf.backup | grep . > /etc/samba/smb.conf'
+```
+
+Agora vamos acessar e editar o arquivo de configurações do samba
+
+```
+$ sudo nano /etc/samba/smb.conf
+```
+
+Deixando ele da seguinte maneira
+
+**RESULTADO**
+```
+[global]
+   workgroup = WORKGROUP
+   netbios name = samba-srv
+   security = user
+   server string = %h server (Samba, Ubuntu)
+   interfaces = 127.0.0.1/8 ens160 ens192
+   bind interfaces only = yes
+   log file = /var/log/samba/log.%m
+   max log size = 1000
+   logging = file
+   panic action = /usr/share/samba/panic-action %d
+   server role = standalone server
+   obey pam restrictions = yes
+   unix password sync = yes
+   passwd program = /usr/bin/passwd %u
+   passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
+   pam password change = yes
+   map to guest = bad user
+   usershare allow guests = yes
+[printers]
+   comment = All Printers
+   browseable = no
+   path = /var/spool/samba
+   printable = yes
+   guest ok = no
+   read only = yes
+   create mask = 0700
+[print$]
+   comment = Printer Drivers
+   path = /var/lib/samba/printers
+   browseable = yes
+   read only = yes
+   guest ok = no
+[homes]
+   comment = Home Directories
+   browseable = yes
+   read only = no
+   create mask = 0700
+   directory mask = 0700
+   valid users = %S
+[public]
+   comment = public anonymous access
+   path = /samba/public
+   browsable =yes
+   create mask = 0660
+   directory mask = 0771
+   writable = yes
+   guest ok = yes
+   guest only = yes
+   force user = nobody
+   force create mode = 0777
+   force directory mode = 0777
+```
+
+Vamos modiificar a pasta public para que apenas usuarios que participem do grupo sambashare possam acessar
+
+```
+[public]
+   comment = public anonymous access
+   path = /samba/public
+   browsable =yes
+   create mask = 0660
+   directory mask = 0771
+   writable = yes
+   guest ok = no
+   valid users = @sambashare
+   #guest only = yes
+   #force user = nobody
+   #force create mode = 0777
+   #force directory mode = 0777
+```
+
+Após salvar vamos reiniciar o nosso servidor
+
+```
+$ sudo systemctl restart smbd
+```
+
+Agora podemos verificar que as portas 445 e 139 estão funcionando nas interfaces ens160 e ens192
+
+```
+$ netstat -an | grep LISTEN
+```
+
+**RESULTADO**
+```
+tcp        0      0 10.9.14.108:445             0.0.0.0:*               LISTEN     
+tcp        0      0 10.9.14.108:139             0.0.0.0:*               LISTEN  
+tcp        0      0 192.168.14.126:445             0.0.0.0:*            LISTEN     
+tcp        0      0 192.168.14.126:139             0.0.0.0:*            LISTEN   
+```
+
+Vamos criar um usuario: ``aluno`` com a senha: ``alunoifal``
+
+```
+$ sudo adduser aluno
+```
+```
+Adding user `aluno' ...
+Adding new group `aluno' (1001) ...
+Adding new user `aluno' (1001) with group `aluno' ...
+Creating home directory `/home/aluno' ...
+Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for aluno
+Enter the new value, or press ENTER for the default
+	Full Name []: Aluno de SRED no IFAL Arapiraca
+	Room Number []: 
+	Work Phone []: 
+	Home Phone []: 
+	Other []: 
+Is the information correct? [Y/n] y
+```
+
+Para vincular o novo usuário ao serviço samba usamos:
+
+Vamos repetir a senha após o seguinte comando
+
+```
+$ sudo smbpasswd -a aluno
+```
+```
+New SMB password:
+Retype new SMB password:
+Added user aluno.
+```
+
+Agora vamos adicionalo ao grupo sambashare
+
+```
+$ sudo usermod -aG sambashare aluno
+```
+
+Vamos criar um diretorio com compartilhamento em rede
+
+```
+$ cd
+```
+```
+$ sudo mkdir sambashare
+```
+```
+$ sudo mkdir -p /samba/public
+```
+
+Agora vamos trocar a permição do pasta public
+
+```
+$ sudo chown -R nobody:nogroup /samba/public
+```
+```
+$ sudo chmod -R 0775 /samba/public
+```
+```
+$ sudo chgrp sambashare /samba/public
+```
+
+###  - Vamos testar
+
+Para testar vamos no nosso explorador de arquivos
+
+Em rede digitamos na barra de rotas o nosso IP:
+
+```
+\\10.9.14.108
+```
+
+Enstão aparecerá as nossas pastas
+
+Já que nosso DNS já está implementado podemos acessar usando o nome da maquina ``smb`` de IP: ``10.9.14.108``
+
+Para acessar a pasta public é nescessario usar nosso usuario ``aluno`` e a senha: ``alunoifal``
+
+
+
+
+
+
+
+
+
+
+
+```
+$
+```
