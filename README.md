@@ -34,8 +34,8 @@ Texto deintrodução
 
 | Nome da VMs | WAN | IP | LAN | IP |
 | --- | --- | --- | --- | --- |
-| IP do GW: | ens160 | 10.9.14.108 | ens192 |	192.168.14.25 |
-| IP do SAMBA: | ens160 | 10.9.14.103 | ens192 |	192.168.14.26 |
+| IP do GW: | ens160 | 10.9.14.103 | ens192 |	192.168.14.25 |
+| IP do SAMBA: | ens160 | 10.9.14.108 | ens192 |	192.168.14.26 |
 | IP do NS1: | ens160 | 10.9.14.126 | ens192 |	192.168.14.27 |
 | IP do NS2: | ens160 | 10.9.14.109 | ens192 |	192.168.14.28 |
 | IP do WEB | ens160 | 10.9.14.217 | ens192 |	192.168.14.29 |
@@ -45,12 +45,12 @@ Texto deintrodução
 
 | VM | Nome | Domínio (zona): | grupo4.turma914.ifalara.local |
 | --- | --- |--- | --- |
-| Aluno08 | Elias | FQDN do GW: | gw.grupo4.turma914.ifalara.local |
-| Aluno03 | Bruno |	FQDN do SAMBA: | smb.grupo4.turma914.ifalara.local |
+| Aluno08 | Bruno | FQDN do GW: | gw.grupo4.turma914.ifalara.local |
+| Aluno03 | Elias |	FQDN do SAMBA: | smb.grupo4.turma914.ifalara.local |
 | Aluno26	| Pedro | FQDN do NS1: | ns1.grupo4.turma914.ifalara.local |
 | Aluno09 | Filipe | FQDN do NS2: | ns2.grupo4.turma914.ifalara.local |	
-| Grupo4vm1	| --- | FQDN do WEB	| www.grupo4.turma914.ifalara.local |	
-| Grupo4vm2 | --- |	FQDN do BD | bd.grupo4.turma914.ifalara.local |
+| Grupo4vm1	| Vm1 | FQDN do WEB	| www.grupo4.turma914.ifalara.local |	
+| Grupo4vm2 | Vm2 |	FQDN do BD | bd.grupo4.turma914.ifalara.local |
 
 # Implementação dos Serivços de Rede (Cada serviço uma sessão)
 
@@ -66,7 +66,7 @@ Texto deintrodução
 
   Nesta maquina ns1 vamos configurar o serviço de resolução de nome (DNS) com o Bind9, utilizando à como DNS Master. 
 
-#### 0 - Antes de tudo vamos mudar o nome da maquina para o nome escolhido que está na tabela:
+### 0 - Antes de tudo vamos mudar o nome da maquina para o nome escolhido que está na tabela:
 
   > ns1.grupo4.turma914.ifalara.local
   
@@ -667,47 +667,67 @@ $ ping google.com
 ---
 
 ### 5 - Agora vamos criar o nosso site.
-  
+
   Primeiro criarmos um diretorio com o nome do nosso domínio, para isso usamos:
   
   ```
-  $ sudo mkdir /var/www/grupo4.turma914.ifalara.local
+  $ sudo mkdir /var/www/www.grupo4.turma914.ifalara.local
   ```
   
   Agora atribuimos a propriedade do diretório com a variável de ambiente $USER:
   
   ```
-  $ sudo chown -R $USER:$USER /var/www/grupo4.turma914.ifalara.local
+  $ sudo chown -R $USER:$USER /var/www/www.grupo4.turma914.ifalara.local
   ```
   
   Agora vamos configurar as permições dos webs hosts, com:
   
   ```
-  $ sudo chmod -R 755 /var/www/grupo4.turma914.ifalara.local
+  $ sudo chmod -R 755 /var/www/www.grupo4.turma914.ifalara.local
   ```
   
-  Agora vomos criar e editar a pagina index.html:
+  Agora vomos apenas adicionar os scripts de testes disponibilizados pelo professor
   
   ```
-  $ sudo nano /var/www/gupo4.turma914.ifalara.local/index.html
+  $ ls -la /var/www/www.grupo7.turma914.ifalara.local
+  ```
+  ```
+  drwxr-xr-x 3 administrador administrador 4096 Mar 17 13:33 .
+  drwxr-xr-x 4 root          root          4096 Mar 17 13:25 ..
+  -rw-rw-r-- 1 administrador administrador 3922 Mar 12 06:56 consult.php
+  drwxrwxr-x 2 administrador administrador 4096 Mar 17 13:30 css
+  -rw-rw-r-- 1 administrador administrador 1233 Mar 12 07:44 deleteAluno.php
+  -rw-rw-r-- 1 administrador administrador 1488 Mar 12 12:56 deleteGrupo.php
+  -rw-rw-r-- 1 administrador administrador 1227 Mar 12 07:20 deleteHost.php
+  -rw-rw-r-- 1 administrador administrador 1292 Mar 12 14:35 delete.html
+  -rw-rw-r-- 1 administrador administrador 1430 Mar 12 13:40 index.html
+  -rw-rw-r-- 1 administrador administrador   20 Mar  9 01:56 info.php
+  -rw-rw-r-- 1 administrador administrador 1105 Mar 12 14:33 insertAluno.php
+  -rw-rw-r-- 1 administrador administrador 1114 Mar 12 14:32 insertGrupo.php
+  -rw-rw-r-- 1 administrador administrador 1112 Mar 12 14:32 insertHost.php
+  -rw-rw-r-- 1 administrador administrador 1282 Mar 12 14:33 insert.html
+  -rw-rw-r-- 1 administrador administrador  606 Mar 11 18:35 insert.php
+  -rw-rw-r-- 1 administrador administrador 1180 Mar 12 14:19 updateAluno.php
+  -rw-rw-r-- 1 administrador administrador 1168 Mar 12 14:25 updateGrupo.php
+  -rw-rw-r-- 1 administrador administrador 1186 Mar 12 14:30 updateHost.php
+  -rw-rw-r-- 1 administrador administrador 1594 Mar 12 14:16 update.html
+  -rw-rw-r-- 1 administrador administrador 3922 Mar 12 06:56 update.php
   ```
   
-  Para que o Apache apresente a nossa página vamos criar um arquivo de configuração novo, com:
+  Para que o Apache apresente a nossa página vamos copiar um arquivo de configuração:
   
   ```
-  $ sudo nano /etc/apache2/sites-available/grupo4.turma914.ifalara.local.conf
+  $ sudo nano /etc/apache2/sites-available/www.grupo7.turma914.ifalara.local.conf
   ```
   
-  Neste arquivo vamos colocar o seguinte bloco de cofigo:
+  Neste arquivo vamos adiciopnar o seguinte bloco de código:
   
   ```
   <VirtualHost *:80>
-      ServerAdmin webmaster@localhost
-      ServerName grupo4.turma914.ifalara.local
-      ServerAlias www.grupo4.turma914.ifalara.local
-      DocumentRoot /var/www/grupo4.turma914.ifalara.local
-      ErrorLog ${APACHE_LOG_DIR}/error.log
-      CustomLog ${APACHE_LOG_DIR}/access.log combined
+   ServerAdmin webmaster@localhost
+          DocumentRoot /var/www/www.grupo7.turma914.ifalara.local
+          ServerAlias www.grupo7.turma914.ifalara.local
+          DocumentRoot /var/www/www.xygrupo7.turma914.ifalara.local
   </VirtualHost>
   ```
   
@@ -716,7 +736,7 @@ $ ping google.com
   Em segida vamos habilitar o arquivo com a ferramenta a2ensite:
   
   ```
-  $ sudo a2ensite grupo4.turma914.ifalara.local.conf
+  $ sudo a2ensite www.grupo4.turma914.ifalara.local.conf
   ```
   
   Vamos desabilitar o site padrão definido em 000-default.conf:
@@ -730,13 +750,19 @@ $ ping google.com
   ```
   $ sudo apache2ctl configtest
   ```
-  
+
+  Vamos modificar as permissões de dono da pasta "DocumentRoot" para "www-data", que é o usuário do apache.
+
+  ```
+  $ chown -R www-data:www-data www.grupo4.turma914.ifalara.local
+  ```
+
   Vamos reiniciar o Apache com:
-  
+
   ```
   $ sudo systemctl restart apache2
   ```
-  
+
   Agora é só acessar novamente no navegador com o IP da maquina. 
   
   ![a2ensite-configtest-restart](/www/a2ensite-configtest-restart.PNG)
@@ -745,82 +771,419 @@ $ ping google.com
 
 --
 
-## Banco de Dados
+## php
 
-  Nesta maquina "bd" vamos configurar o servidor de banco de dados usando a ferramenta MySQL e configurar a maquina como cliente do serviço DNS. 
+  Ainda na maquina "www" vamos fazer a instalação do php
+
+  Vamos fazer um update na maquina:
+
+  ```
+  $ sudo apt update -y
+  ```
+
+  Caso precise faça o upgrade na maquina:
+
+  ```
+  $ sudo apt upgrade -y
+  ```
+
+### 1 - Vamos isntalar o php
+
+  ```
+  $ sudo apt install php7.4 libapache2-mod-php7.4 php7.4-mysql php-common php7.4-cli php7.4-common php7.4-common php7.4-json php7.4-opcache php7.4-readline
+  ```
+
+  Para carregar o php7.4 usamos:
+  ```
+  $ sudo a2enmod php7.4
+  ```
+
+  Agora reioniciamos o apache2
+
+  ```
+  $ sudo systemctl restart apache2
+  ```
+
+  > Obs.: O php já está funcionandop no servidor web
+
+### 2 - Vamos configurar o servidor com php
+
+  Vamos criar o arquivo "info.ph"
+
+  ```
+  $ sudo touch /var/www/html/info.php
+  ```
+
+  Vamos editar o arquivo info.php e adicionar a linha a segir
+
+  ```
+  <?php phpinfo(); ?>
+  ```
+
+  Para isso usamos o comando:
+
+  ```
+  $ sudo nano /var/www/html/info.php
+  ```
+
+### 3 - Vamos Testar
+
+  Para Acessar o site baasta digitar o IP da máquina "www", "/" e e o "nome_do_arquivo"
+
+  ```
+  http://10.9.14.217/info.php
+  ```
+   
+  ![site_info_php](/www/site_info_php.PNG)
+  
+  --
+Nesta maquina "bd" vamos configurar o servidor de banco de dados usando a ferramenta MySQL e configurar a maquina como cliente do serviço DNS. 
 
 ### 0 - Primeiro vamos mudar o nome da maquina para o nome escolhhido que está na tabela:
 
   > bd.grupo4.turma914.ifalara.local
 
-  Com o comando:
-  
-  ```
-  $ sudo hostnamectl set-hostname bd.grupo4.turma914.ifalara.local
-  ```
-  
-  ![hostname](/bd/hostname.PNG)
+Com o comando:
 
-### 1 - Primeiro vamos configurar essa maquina como cliente do serviço DNS. Para isso vamos configurar as interfaces de rede e adicionar os IPs de DNS e o compo "search".
-  
-  Vamos entrar no arquivo de configuração:
+```
+$ sudo hostnamectl set-hostname bd.grupo4.turma914.ifalara.local
+```
 
-  ```
-  $ sudo nano /etc/netplan/00-installer-config.yaml
-  ```
-  
-**RESULTADO**
+![/bd/hostname](/bd/hostname.PNG)
 
-  ```
-  #This is the network config written by 'subiquity'
-  network:
-      ethernets:
-          ens160:
-            dhcp4: false
-            addresses: [10.9.14.217/24]
-            gateway4: 10.9.14.1
-            nameservers:
-              addresses:
-                 - 10.9.14.126
-                 - 10.9.14.109
-              search: [grupo4.turma914.ifalara.local]
-          ens192:
-            dhcp4: false
-            addresses: [192.168.0.29/29]
-      version: 2
-  ```
-  
-  ![installer_confing](/bd/installer_confing.PNG)
+1- Primeiro vamos configurar essa maquina como cliente do serviço DNS. Para isso vamos configurar as interfaces de rede e adicionar os IPs de DNS e o compo "search".
+Vamos entrar no arquivo de configuração:
+$ sudo nano /etc/netplan/00-installer-config.yaml
+RESULTADO
+#This is the network config written by 'subiquity'
+network:
+    ethernets:
+        ens160:
+          dhcp4: false
+          addresses: [10.9.14.217/24]
+          gateway4: 10.9.14.1
+          nameservers:
+            addresses:
+               - 10.9.14.126
+               - 10.9.14.109
+            search: [grupo4.turma914.ifalara.local]
+        ens192:
+          dhcp4: false
+          addresses: [192.168.0.29/29]
+    version: 2
 
-  Em seguida vamos aplicar as alterações.
 
-  Para isso usamos:
+![/bd/hostname](/bd/installer_confing.PNG)
+-
 
-  ```
-  $ sudo netplan apply
-  ```
-  
-### 2- Agora vamos testar se está funcionando normalmente.
+Em seguida vamos aplicar as alterações.
 
-  ```
-  $ dig @10.9.14.126 gw.grupo4.turma914.ifalara.local
-  ```
-  
-  Na linha "ANSWER SECTION:" tem que aparecer que foi resolvido, com o dominio e o IP.
-  
-  Vamos usar o seguinte comando para verificar se a interface 160 está funcionando:
-  
-  ```
-  $ systemd-resolve --status ens160
-  ```
-  
-  Para finalizar vamos ver se o nosso serviço DNS revolve o DNS do google:
+Para isso usamos:
+```
+$ sudo netplan apply
+```
 
-  ```
-  $ ping google.com
-  ```
-  
-  ![dig-system_resolve-ping](/bd/dig-system_resolve-ping.PNG)
+### 2 - Agora vamos testar se está funcionando normalmente.
+
+```
+$ dig @10.9.14.126 gw.grupo4.turma914.ifalara.local
+```
+
+Na linha "ANSWER SECTION:" tem que aparecer que foi resolvido, com o dominio e o IP.
+
+Vamos usar o seguinte comando para verificar se a interface 160 está funcionando:
+
+```
+$ systemd-resolve --status ens160
+```
+
+Para finalizar vamos ver se o nosso serviço DNS revolve o DNS do google:
+
+```
+$ ping google.com
+```
+
+![/bd/dig-system_resolve-ping](/bd/dig-system_resolve-ping.PNG)
+---
+
+### 3 - Instalação do Mysql Server
+
+Vamos fazer um update na maquina:
+
+```
+$ sudo apt update -y
+```
+
+Caso precise faça o upgrade na maquina:
+
+```
+$ sudo apt upgrade -y
+```
+
+### 1 - Vamos isntalar o Mysql
+
+```
+$ sudo apt install mysql-server
+```
+
+Para verificar se o serviço está funcionando basta digitar:
+
+```
+$ systemctl status mysql
+```
+
+### 2 - Agoma Vamos configurar
+
+Vamso verificar quais as portas que estão sendoutilizadas e em quais IPs
+
+Para isso usamos:
+
+```
+$  netstat -an | grep LISTEN
+```
+
+![/bd/netstat_antes](/bd/netstat_antes.PNG)
+
+> Obs.: As portas "3306" e "33060" estão recebendo somente conexão da interface "127.0.0.1"
+
+Vamos libera as portas 
+
+```
+$ sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+
+Nas linhas "mysqlx-bind-addresse" e "bind-address" vamos substituir "127.0.0.1" por "0.0.0.0"
+
+```
+# localhost which is more compatible and is not less secure.
+bind-address            = 0.0.0.0
+mysqlx-bind-address     = 0.0.0.0
+```
+
+![mysqld_cnf](/bd/mysqld_cnf.PNG)
+
+Após isso vamos reiniciar o serviço com:
+
+```
+$ systemctl restart mysql
+```
+
+Se verificamos novamente as porta agora estão recebendo IPs diferentes
+
+```
+$ netstat -an | grep LISTEN
+```
+
+![/bd/netstat_depois](/bd/netstat_depois.PNG)
+
+### 3 - Configuração de segurança
+
+Vamos adicionar umasenha para o MySQL, para isso usamos:
+
+```
+$ sudo mysql_secure_installation
+```
+
+```
+Securing the MySQL server deployment.
+
+Connecting to MySQL using a blank password.
+
+VALIDATE PASSWORD COMPONENT can be used to test passwords
+and improve security. It checks the strength of password
+and allows the users to set only those passwords which are
+secure enough. Would you like to setup VALIDATE PASSWORD component?
+
+Press y|Y for Yes, any other key for No:
+```
+
+Digite "y" aceitar creiar uma senha
+
+```
+Press y|Y for Yes, any other key for No: y
+
+There are three levels of password validation policy:
+
+LOW    Length >= 8
+MEDIUM Length >= 8, numeric, mixed case, and special characters
+STRONG Length >= 8, numeric, mixed case, special characters and dictionary                  file
+
+Please enter 0 = LOW, 1 = MEDIUM and 2 = STRONG: 
+```
+
+> Obs.: Nossa senha é: ``S3nh4@ifal``
+
+```
+Please set the password for root here.
+
+New password: 
+
+Re-enter new password: 
+
+Estimated strength of the password: 100 
+Do you wish to continue with the password provided?(Press y|Y for Yes, any other key for No) : y
+By default, a MySQL installation has an anonymous user,
+allowing anyone to log into MySQL without having to have
+a user account created for them. This is intended only for
+testing, and to make the installation go a bit smoother.
+You should remove them before moving into a production
+environment.
+
+Remove anonymous users? (Press y|Y for Yes, any other key for No) : y
+Success.
+
+
+Normally, root should only be allowed to connect from
+'localhost'. This ensures that someone cannot guess at
+the root password from the network.
+
+Disallow root login remotely? (Press y|Y for Yes, any other key for No) : y
+Success.
+
+By default, MySQL comes with a database named 'test' that
+anyone can access. This is also intended only for testing,
+and should be removed before moving into a production
+environment.
+
+
+Remove test database and access to it? (Press y|Y for Yes, any other key for No) : n
+
+ ... skipping.
+Reloading the privilege tables will ensure that all changes
+made so far will take effect immediately.
+
+Reload privilege tables now? (Press y|Y for Yes, any other key for No) : y
+Success.
+
+All done! 
+```
+
+![mysql_secure](/bd/mysql_secure.PNG)
+
+Vamos iniciar o MySQL
+
+```
+$ sudo mysql
+```
+
+```
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 10
+Server version: 8.0.28-0ubuntu0.20.04.3 (Ubuntu)
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+```
+
+Já estamos conectados no MySQL, para sair usamos: ``exit``
+
+### 4 - Trabalhando com MySQL
+
+Agora vamos criar o Banco de Dados ``projetofinal_sred`` com as seguintes tabelas ``grupo``, ``aluno`` e ``host``
+
+Para isso usamos os seguintes comandos
+
+Para criar o banco de dados:
+
+```
+CREATE DATABASE projetofinal_sred;
+```
+
+Para usar o banco de dados criado
+
+```
+USE projetofinal_sred;
+```
+
+Agora vamos criar as tabelas:
+
+```
+CREATE TABLE aluno (UID int(10) unsigned NOT NULL AUTO_INCREMENT, Nome varchar (255), Email varchar (255), GID int,PRIMARY KEY (`UID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+```
+CREATE TABLE grupo (GID int(10) unsigned NOT NULL, Nome varchar (255), Dominio varchar (255), PRIMARY KEY (`GID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+```
+CREATE TABLE host (HID int(10) unsigned NOT NULL AUTO_INCREMENT, VmName varchar (255), FQDName varchar (255), GID int, PRIMARY KEY (`HID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+
+Para ver as tabelas basta usar:
+
+```
+SHOW TABLE;
+```
+
+Para adicionar dados nas nossas tabelas usamos:
+
+```
+INSERT INTO aluno
+VALUES (value1, value2, value3, ...);
+```
+
+Caso tenha dados nas tabelas podemos ver esses dados usando:
+
+```
+SELECT * FROM aluno;
+```
+```
+SELECT * FROM grupo;
+```
+```
+SELECT * FROM host;
+```
+
+Vamos criar um usuário que acessa pelo localhost com: user: 'pfadmin' e senha '4dm1n@BD'
+
+```
+CREATE USER 'pfadmin'@'localhost' IDENTIFIED BY '4dm1n@BD';
+```
+
+Agora vamos dar privilegios de acesso ao usuario criado
+
+```
+GRANT ALL PRIVILEGES ON *.* TO 'pfadmin'@'localhost' WITH GRANT OPTION;
+```
+
+Vamos criar um usuário que acessa pela web com: user: 'pfadmin' e senha '4dm1n@BD'
+
+```
+CREATE USER 'pfadmin'@'10.9.14.217' IDENTIFIED BY '4dm1n@BD';
+```
+
+Agora vamos conceder privilégios de acesso a todas as tabelas
+
+```
+GRANT ALL PRIVILEGES ON *.* TO 'pfadmin'@'10.9.14.217' WITH GRANT OPTION;
+```
+
+Para sair do MySQL usamos:
+
+```
+exit
+```
+
+### 5 - Para testar o nosso banco de dados
+
+> Obs.: Vamos usar os scripts disponibilizados pelo professor Alaelson.
+
+Como nossa implenetação já está funcionando então vamos fazer os testes dirtetamente no site 
+
+Já que o nosso DNS está funcionado podemos acessar o nosso site pela nome: ``www.grupo4.turma914.ifalara.local``
+
+![/www/site](/www/site.PNG)
+
+![/www/siteINSERT](/www/siteINSERT.PNG)
+
+![/www/siteSELECTgrupo](/www/siteSELECTgrupo.PNG)
+
+![/www/siteSELECTaluno](/www/siteSELECTaluno.PNG)
 
 --
 
