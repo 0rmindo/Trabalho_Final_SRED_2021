@@ -1,0 +1,391 @@
+Nesta maquina "bd" vamos configurar o servidor de banco de dados usando a ferramenta MySQL e configurar a maquina como cliente do serviço DNS. 
+
+### 0 - Primeiro vamos mudar o nome da maquina para o nome escolhhido que está na tabela:
+
+  > bd.grupo4.turma914.ifalara.local
+
+Com o comando:
+
+```
+$ sudo hostnamectl set-hostname bd.grupo4.turma914.ifalara.local
+```
+
+![/bd/hostname](/bd/hostname.PNG)
+
+1- Primeiro vamos configurar essa maquina como cliente do serviço DNS. Para isso vamos configurar as interfaces de rede e adicionar os IPs de DNS e o compo "search".
+Vamos entrar no arquivo de configuração:
+$ sudo nano /etc/netplan/00-installer-config.yaml
+RESULTADO
+#This is the network config written by 'subiquity'
+network:
+    ethernets:
+        ens160:
+          dhcp4: false
+          addresses: [10.9.14.217/24]
+          gateway4: 10.9.14.1
+          nameservers:
+            addresses:
+               - 10.9.14.126
+               - 10.9.14.109
+            search: [grupo4.turma914.ifalara.local]
+        ens192:
+          dhcp4: false
+          addresses: [192.168.0.29/29]
+    version: 2
+
+
+![/bd/hostname](/bd/installer_confing.PNG)
+-
+
+Em seguida vamos aplicar as alterações.
+
+Para isso usamos:
+```
+$ sudo netplan apply
+```
+
+### 2 - Agora vamos testar se está funcionando normalmente.
+
+```
+$ dig @10.9.14.126 gw.grupo4.turma914.ifalara.local
+```
+
+Na linha "ANSWER SECTION:" tem que aparecer que foi resolvido, com o dominio e o IP.
+
+Vamos usar o seguinte comando para verificar se a interface 160 está funcionando:
+
+```
+$ systemd-resolve --status ens160
+```
+
+Para finalizar vamos ver se o nosso serviço DNS revolve o DNS do google:
+
+```
+$ ping google.com
+```
+
+![/bd/dig-system_resolve-ping](/bd/dig-system_resolve-ping.PNG)
+---
+
+### 3 - Instalação do Mysql Server
+
+Vamos fazer um update na maquina:
+
+```
+$ sudo apt update -y
+```
+
+Caso precise faça o upgrade na maquina:
+
+```
+$ sudo apt upgrade -y
+```
+
+### 1 - Vamos isntalar o Mysql
+
+```
+$ sudo apt install mysql-server
+```
+
+Para verificar se o serviço está funcionando basta digitar:
+
+```
+$ systemctl status mysql
+```
+
+### 2 - Agoma Vamos configurar
+
+Vamso verificar quais as portas que estão sendoutilizadas e em quais IPs
+
+Para isso usamos:
+
+```
+$  netstat -an | grep LISTEN
+```
+
+![/bd/netstat_antes](/bd/netstat_antes.PNG)
+
+> Obs.: As portas "3306" e "33060" estão recebendo somente conexão da interface "127.0.0.1"
+
+Vamos libera as portas 
+
+```
+$ sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+
+Nas linhas "mysqlx-bind-addresse" e "bind-address" vamos substituir "127.0.0.1" por "0.0.0.0"
+
+```
+# localhost which is more compatible and is not less secure.
+bind-address            = 0.0.0.0
+mysqlx-bind-address     = 0.0.0.0
+```
+
+![mysqld_cnf](/bd/mysqld_cnf.PNG)
+
+Após isso vamos reiniciar o serviço com:
+
+```
+$ systemctl restart mysql
+```
+
+Se verificamos novamente as porta agora estão recebendo IPs diferentes
+
+```
+$ netstat -an | grep LISTEN
+```
+
+![/bd/netstat_depois](/bd/netstat_depois.PNG)
+
+### 3 - Configuração de segurança
+
+Vamos adicionar umasenha para o MySQL, para isso usamos:
+
+```
+$ sudo mysql_secure_installation
+```
+
+```
+Securing the MySQL server deployment.
+
+Connecting to MySQL using a blank password.
+
+VALIDATE PASSWORD COMPONENT can be used to test passwords
+and improve security. It checks the strength of password
+and allows the users to set only those passwords which are
+secure enough. Would you like to setup VALIDATE PASSWORD component?
+
+Press y|Y for Yes, any other key for No:
+```
+
+Digite "y" aceitar creiar uma senha
+
+```
+Press y|Y for Yes, any other key for No: y
+
+There are three levels of password validation policy:
+
+LOW    Length >= 8
+MEDIUM Length >= 8, numeric, mixed case, and special characters
+STRONG Length >= 8, numeric, mixed case, special characters and dictionary                  file
+
+Please enter 0 = LOW, 1 = MEDIUM and 2 = STRONG: 
+```
+
+> Obs.: Nossa senha é: ``S3nh4@ifal``
+
+```
+Please set the password for root here.
+
+New password: 
+
+Re-enter new password: 
+
+Estimated strength of the password: 100 
+Do you wish to continue with the password provided?(Press y|Y for Yes, any other key for No) : y
+By default, a MySQL installation has an anonymous user,
+allowing anyone to log into MySQL without having to have
+a user account created for them. This is intended only for
+testing, and to make the installation go a bit smoother.
+You should remove them before moving into a production
+environment.
+
+Remove anonymous users? (Press y|Y for Yes, any other key for No) : y
+Success.
+
+
+Normally, root should only be allowed to connect from
+'localhost'. This ensures that someone cannot guess at
+the root password from the network.
+
+Disallow root login remotely? (Press y|Y for Yes, any other key for No) : y
+Success.
+
+By default, MySQL comes with a database named 'test' that
+anyone can access. This is also intended only for testing,
+and should be removed before moving into a production
+environment.
+
+
+Remove test database and access to it? (Press y|Y for Yes, any other key for No) : n
+
+ ... skipping.
+Reloading the privilege tables will ensure that all changes
+made so far will take effect immediately.
+
+Reload privilege tables now? (Press y|Y for Yes, any other key for No) : y
+Success.
+
+All done! 
+```
+
+![mysql_secure](/bd/mysql_secure.PNG)
+
+Vamos iniciar o MySQL
+
+```
+$ sudo mysql
+```
+
+```
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 10
+Server version: 8.0.28-0ubuntu0.20.04.3 (Ubuntu)
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+```
+
+Já estamos conectados no MySQL, para sair usamos: ``exit``
+
+### 4 - Trabalhando com MySQL
+
+Agora vamos criar o Banco de Dados ``projetofinal_sred`` com as seguintes tabelas ``grupo``, ``aluno`` e ``host``
+
+Para isso usamos os seguintes comandos
+
+Para criar o banco de dados:
+
+````
+CREATE DATABASE projetofinal_sred;
+```
+
+Para usar o banco de dados criado
+
+```
+USE projetofinal_sred;
+```
+
+Agora vamos criar as tabelas:
+
+````
+CREATE TABLE aluno (UID int(10) unsigned NOT NULL AUTO_INCREMENT, Nome varchar (255), Email varchar (255), GID int,PRIMARY KEY (`UID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+````
+CREATE TABLE grupo (GID int(10) unsigned NOT NULL, Nome varchar (255), Dominio varchar (255), PRIMARY KEY (`GID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+````
+CREATE TABLE host (HID int(10) unsigned NOT NULL AUTO_INCREMENT, VmName varchar (255), FQDName varchar (255), GID int, PRIMARY KEY (`HID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+
+Para ver as tabelas basta usar:
+
+```
+SHOW TABLE;
+```
+
+Para adicionar dados nas nossas tabelas usamos:
+
+```
+INSERT INTO aluno
+VALUES (value1, value2, value3, ...);
+```
+
+Caso tenha dados nas tabelas podemos ver esses dados usando:
+
+```
+SELECT * FROM aluno;
+```
+```
+SELECT * FROM grupo;
+```
+```
+SELECT * FROM host;
+```
+
+Vamos criar um usuário que acessa pelo localhost com: user: 'pfadmin' e senha '4dm1n@BD'
+
+````
+CREATE USER 'pfadmin'@'localhost' IDENTIFIED BY '4dm1n@BD';
+```
+
+Agora vamos dar privilegios de acesso ao usuario criado
+
+````
+GRANT ALL PRIVILEGES ON *.* TO 'pfadmin'@'localhost' WITH GRANT OPTION;
+```
+
+Vamos criar um usuário que acessa pela web com: user: 'pfadmin' e senha '4dm1n@BD'
+
+```
+CREATE USER 'pfadmin'@'10.9.14.217' IDENTIFIED BY '4dm1n@BD';
+```
+
+Agora vamos conceder privilégios de acesso a todas as tabelas
+
+```
+GRANT ALL PRIVILEGES ON *.* TO 'pfadmin'@'10.9.14.217' WITH GRANT OPTION;
+```
+
+Para sair do MySQL usamos:
+
+```
+exit
+```
+
+### 5 - Para testar o nosso banco de dados
+
+> Obs.: Vamos usar os scripts disponibilizados pelo professor Alaelson.
+
+Para isso baixamos o zip e unzip para descompactar o arquivo script_teste_db.zip na máquina do seu servidor Web.
+
+
+Já conectado na nossa VM "www", vamos instalar o zip e unzinp
+
+```
+$ sudo apt install zip unzip -y
+```
+
+Agora baixar e descompactar o nosso arquivo
+
+```
+$ cd ~
+```
+```
+$ curl https://github.com/alaelson/labredes2021/blob/main/network/lamp/testedb/script_teste_db.zip -o script_teste_db.zip
+```
+```
+$ unzip scrip_teste_db.zip
+```
+
+### 6 - Vamos testar
+
+Para testar usamso os segintes scripts 
+
+Para inserir uma entrada
+
+```
+$ php insert.php
+```
+
+Para consultar a entrado 
+
+```
+$ php select.php
+```
+
+Para deletar a entrada
+
+```
+$ php select.php
+```
+
+Para alterar a entrada
+
+```
+$ php update.php
+```
+
+
+
+
+```
+$ 
+```

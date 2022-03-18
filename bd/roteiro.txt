@@ -1,0 +1,45 @@
+Nesta maquina "bd" vamos configurar o servidor de banco de dados usando a ferramenta MySQL e configurar a maquina como cliente do serviço DNS. 
+
+0- Primeiro vamos mudar o nome da maquina para o nome escolhhido que está na tabela:
+> bd.grupo4.turma914.ifalara.local
+Com o comando:
+$ sudo hostnamectl set-hostname bd.grupo4.turma914.ifalara.local
+(IMG: hostname.PNG)
+
+1- Primeiro vamos configurar essa maquina como cliente do serviço DNS. Para isso vamos configurar as interfaces de rede e adicionar os IPs de DNS e o compo "search".
+Vamos entrar no arquivo de configuração:
+$ sudo nano /etc/netplan/00-installer-config.yaml
+RESULTADO
+#This is the network config written by 'subiquity'
+network:
+    ethernets:
+        ens160:
+          dhcp4: false
+          addresses: [10.9.14.217/24]
+          gateway4: 10.9.14.1
+          nameservers:
+            addresses:
+               - 10.9.14.126
+               - 10.9.14.109
+            search: [grupo4.turma914.ifalara.local]
+        ens192:
+          dhcp4: false
+          addresses: [192.168.0.29/29]
+    version: 2
+(IMG: installer_confing.PNG)
+-
+Em seguida vamos aplicar as alterações.
+Para isso usamos:
+$ sudo netplan apply
+
+2- Agora vamos testar se está funcionando normalmente.
+$ dig @10.9.14.126 gw.grupo4.turma914.ifalara.local
+Na linha "ANSWER SECTION:" tem que aparecer que foi resolvido, com o dominio e o IP.
+Vamos usar o seguinte comando para verificar se a interface 160 está funcionando:
+$ systemd-resolve --status ens160
+Para finalizar vamos ver se o nosso serviço DNS revolve o DNS do google:
+$ ping google.com
+(IMG: dig-system_resolve-ping.PNG)
+---
+
+3- 
