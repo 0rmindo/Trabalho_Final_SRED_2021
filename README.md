@@ -365,7 +365,7 @@ Vamos condigurar a maquina "smb" nela vamosadiconar a resolução de nomes e o s
   \\10.9.14.108
   ```
 
-  ![teste_smb_ip](teste_smb_ip.PNG)
+  ![teste_smb_ip](/smb/teste_smb_ip.PNG)
 
   Enstão aparecerá as nossas pastas
 
@@ -1754,7 +1754,7 @@ $ sudo /etc/bind/zones/db.grupo4.turma914.ifalara.local
 smb CNAME gw
 ```
 
-![zonaDireta_canme](/gw/.PNG)
+![zonaDireta_canme](/gw/zonaDireta_canme.PNG)
 
 Para checar usamos:
 
