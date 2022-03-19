@@ -1057,9 +1057,9 @@ $ ping google.com
   ```
   <VirtualHost *:80>
    ServerAdmin webmaster@localhost
-          DocumentRoot /var/www/www.grupo7.turma914.ifalara.local
-          ServerAlias www.grupo7.turma914.ifalara.local
-          DocumentRoot /var/www/www.xygrupo7.turma914.ifalara.local
+          DocumentRoot /var/www/www.grupo4.turma914.ifalara.local
+          ServerAlias www.grupo4.turma914.ifalara.local
+          DocumentRoot /var/www/www.grupo4.turma914.ifalara.local
   </VirtualHost>
   ```
   
