@@ -4,6 +4,7 @@ Vamos condigurar a maquina "smb" nela vamosadiconar a resolução de nomes e o s
 
 > smb.grupo4.turma914.ifalara.local
 Com o comando:
+
 ```
 $ sudo hostnamectl set-hostname smb.grupo4.turma914.ifalara.local
 ```
@@ -12,10 +13,13 @@ $ sudo hostnamectl set-hostname smb.grupo4.turma914.ifalara.local
 ### 1 - Primeiro vamos configurar essa maquina como cliente do serviço DNS. Para isso vamos configurar as interfaces de rede e adicionar os IPs de DNS e o compo "search".
 
 Vamos entrar no arquivo de configuração:
+
 ```
-$ sudo nano /etc/netplan/00-install-config.yaml
+$ sudo nano /etc/netplan/00-installer-config.yaml
 ```
+
 **RESULTADO**
+
 ```
 #This is the network config written by 'subiquity'
 network:
@@ -34,7 +38,7 @@ network:
           addresses: [192.168.14.26/29]
     version: 2
 ```
-![install_confing](/www/install_confing.PNG)
+![install_confing](/smb/install_confing.PNG)
 
 Em seguida vamos aplicar as alterações.
 Para isso usamos:
@@ -57,7 +61,7 @@ $ systemd-resolve --status ens160
 
 Para finalizar vamos ver se o nosso serviço DNS revolve o DNS do google:
 $ ping google.com
-![dig-system_resolve-ping](/www/dig-system_resolve-ping.PNG)
+![dig-system_resolve-ping](/smb/dig-system_resolve-ping.PNG)
 ---
 
 ### 3 - Vamos instalar o Samba
@@ -75,7 +79,7 @@ $ sudo apt install samba
 Para ver o status usamos:
 
 ```
-$  sudo systemctl status smbd
+$ sudo systemctl status smbd
 ```
 
 **RESULTADO**
@@ -93,10 +97,12 @@ tcp        0      0 0.0.0.0:445             0.0.0.0:*               LISTEN
 tcp        0      0 0.0.0.0:139             0.0.0.0:*               LISTEN   
 ```
 
+![grep_listen_antes](/smb/grep_listen_antes.PNG)
+
 Vamos fazer o backup do arquivo de configuração do samba e cria um arquivo novo
 
 ```
-$  sudo cp /etc/samba/smb.conf{,.backup}
+$ sudo cp /etc/samba/smb.conf{,.backup}
 ```
 
 Para verificar se foi criado o novo arquivo
@@ -199,6 +205,8 @@ Vamos modiificar a pasta public para que apenas usuarios que participem do grupo
    #force directory mode = 0777
 ```
 
+![smb_conf](/smb/smb_conf.PNG)
+
 Após salvar vamos reiniciar o nosso servidor
 
 ```
@@ -218,6 +226,8 @@ tcp        0      0 10.9.14.108:139             0.0.0.0:*               LISTEN
 tcp        0      0 192.168.14.126:445             0.0.0.0:*            LISTEN     
 tcp        0      0 192.168.14.126:139             0.0.0.0:*            LISTEN   
 ```
+
+![grep_listen_depois](/smb/grep_listen_depois.PNG)
 
 Vamos criar um usuario: ``aluno`` com a senha: ``alunoifal``
 
@@ -245,7 +255,7 @@ Is the information correct? [Y/n] y
 
 Para vincular o novo usuário ao serviço samba usamos:
 
-Vamos repetir a senha após o seguinte comando
+Caso queira mudar a senha:
 
 ```
 $ sudo smbpasswd -a aluno
@@ -265,10 +275,7 @@ $ sudo usermod -aG sambashare aluno
 Vamos criar um diretorio com compartilhamento em rede
 
 ```
-$ cd
-```
-```
-$ sudo mkdir sambashare
+$ sudo mkdir /home/aluno/sambashare
 ```
 ```
 $ sudo mkdir -p /samba/public
@@ -296,18 +303,29 @@ Em rede digitamos na barra de rotas o nosso IP:
 \\10.9.14.108
 ```
 
+![teste_smb_ip](teste_smb_ip.PNG)
+
 Enstão aparecerá as nossas pastas
 
 Já que nosso DNS já está implementado podemos acessar usando o nome da maquina ``smb`` de IP: ``10.9.14.108``
 
+```
+\\smb.grupo4.turma914.ifalara.local
+```
+
+![teste_smb_nome](/smb/teste_smb_nome.PNG)
+
 Para acessar a pasta public é nescessario usar nosso usuario ``aluno`` e a senha: ``alunoifal``
 
+Vamos criar um arquivo no explorador de arquivos do windows para testar
 
 
+![teste_smb_texto](/smb/teste_smb_texto.PNG)
+
+![teste_smb_ls](/smb/teste_smb_ls.PNG)
 
 
-
-
+#### Nosso serviço samba está funcionando!
 
 
 

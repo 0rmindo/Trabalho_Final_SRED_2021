@@ -1,0 +1,341 @@
+Vamos testar toas as conexões de rede
+
+dig @10.9.14.xxx nome.grupo4.turma914.ifalara.local
+
+![dig_xxx-nome](/teste/dig_xxx-nome.PNG)
+
+
+---
+
+# 1 dig @ns1 ns1_fqdn
+
+```
+$ dig @10.9.14.126 ns1.grupo4.turma914.ifalara.local
+```
+
+![dig_126-ns1](/teste/dig_126-ns1.PNG)
+
+---
+
+# 2 dig @ns1 ns2_fqdn  
+
+```
+$ dig @10.9.14.126 ns2.grupo4.turma914.ifalara.local
+```
+
+![dig_126-ns2](/teste/dig_126-ns2.PNG)
+
+---
+
+# 3 dig @ns1 gw_fqdn
+
+```
+$ dig @10.9.14.126 gw.grupo4.turma914.ifalara.local
+```
+
+![dig_126-gw](/teste/dig_126-gw.PNG)
+
+---
+
+# 4 dig @ns1 samba_fqdn
+
+
+```
+$ dig @10.9.14.126 smb.grupo4.turma914.ifalara.local
+```
+
+![dig_126-smb](/teste/dig_126-smb.PNG)
+
+---
+
+# 5 dig @ns1 www_fqdn 
+
+```
+$ dig @10.9.14.126 www.grupo4.turma914.ifalara.local
+```
+
+![dig_126-www](/teste/dig_126-www.PNG)
+
+---
+
+# 6 dig @ns1 bd_fqdn 
+
+```
+$ dig @10.9.14.126 bd.grupo4.turma914.ifalara.local
+```
+
+![dig_126-bd](/teste/dig_126-bd.PNG)
+
+---x---
+
+---x---
+
+# 1 dig -x ns1_IP @ns1
+
+```
+$ dig -x 10.9.14.126 @10.9.14.126
+```
+
+![dig_x-126-ns1](/teste/dig_x-126-ns1.PNG)
+
+---
+
+# 2 dig -x ns2_IP @ns1
+
+```
+$ dig -x 10.9.14.109 @10.9.14.126
+```
+
+![dig_x-126-ns2](/teste/dig_x-126-ns2.PNG)
+
+---
+
+# 3 dig -x gw_IP @ns1
+
+```
+$ dig -x 10.9.14.103 @10.9.14.126
+```
+
+![dig_x-126-gw](/teste/dig_x-126-gw.PNG)
+
+---
+
+# 4 dig -x samba_IP @ns1
+
+```
+$ dig -x 10.9.14.108 @10.9.14.126
+```
+
+![dig_x-126-smb](/teste/dig_x-126-smb.PNG)
+
+# 5 dig -x www_IP @ns1
+
+```
+$ dig -x 10.9.14.217 @10.9.14.126
+```
+
+![dig_x-126-www](/teste/dig_x-126-www.PNG)
+
+---
+
+# 6 dig -x bd_IP @ns1
+
+```
+$ dig -x 10.9.14.218 @10.9.14.126
+```
+
+![dig_x-126-bd](/teste/dig_x-126-bd.PNG)
+
+---
+dig -x ns1_IP @ns1 
+dig -x ns2_IP @ns1 
+dig -x gw_IP @ns1
+dig -x samba_IP @ns1
+dig -x www_IP @ns1
+dig -x bd_IP @ns1
+---x---
+
+nslookup ns1 ns1 
+nslookup ns2 ns1 
+nslookup gw ns1
+nslookup samba ns1
+nslookup www ns1
+nslookup bd ns1
+
+![nslookup_ns1_dir](/teste/nslookup_ns1_dir.PNG)
+
+---
+
+nslookup ns1_IP ns1 
+nslookup ns2_IP ns1 
+nslookup gw_IP ns1
+nslookup samba_IP ns1
+nslookup www_IP ns1
+nslookup bd_IP ns1
+
+![nslookup_ns1_rev](/teste/nslookup_ns1_rev.PNG)
+
+---x---
+---x---
+
+# 1 dig @ns2 ns1_fqdn
+
+```
+$ dig @10.9.14.109 ns1.grupo4.turma914.ifalara.local
+```
+
+![dig_109-ns1](/teste/dig_109-ns1.PNG)
+
+---
+
+# 2 dig @ns2 ns2_fqdn
+
+```
+$ dig @10.9.14.109 ns2.grupo4.turma914.ifalara.local
+```
+
+![dig_109-ns2](/teste/dig_109-ns2.PNG)
+
+---
+
+# 3 dig @ns2 gw_fqdn
+
+```
+$ dig @10.9.14.109 gw.grupo4.turma914.ifalara.local
+```
+
+![dig_109-ns2](/teste/dig_109-ns2.PNG)
+
+---
+
+# 4 dig @ns2 smb_fqdn
+
+```
+$ dig @10.9.14.109 smb.grupo4.turma914.ifalara.local
+```
+
+![dig_109-smb](/teste/dig_109-smb.PNG)
+
+---
+
+# 5 dig @ns2 www_fqdn
+
+```
+$ dig @10.9.14.109 www.grupo4.turma914.ifalara.local
+```
+
+![dig_109-www](/teste/dig_109-www.PNG)
+
+---
+
+# 6 dig @ns2 bd_fqdn
+
+```
+$ dig @10.9.14.109 bd.grupo4.turma914.ifalara.local
+```
+
+![dig_109-bd](/teste/dig_109-bd.PNG)
+
+---
+
+# 1 dig bd_fqdn @ns2
+
+```
+$ dig bd.grupo4.turma914.ifalara.local
+```
+
+![dig_109-bd](/teste/dig_109-bd.PNG)
+
+---
+
+dig ns1_fqdn @ns2
+dig ns2_fqdn @ns2 
+dig gw_fqdn @ns2
+dig samba_fqdn @ns2
+dig www_fqdn @ns2
+dig bd_fqdn @ns2
+
+---
+
+# 1 dig -x ns1_IP @ns2
+
+```
+$ dig -x 10.9.14.126 @10.9.14.109
+```
+
+![dig_x_109-ns1](/teste/dig_x-109-ns1.PNG)
+
+---
+
+# 2 dig -x ns2_IP @ns2
+
+```
+$ dig -x 10.9.14.109 @10.9.14.109
+```
+
+![dig_x_109-ns2](/teste/dig_x-109-ns2.PNG)
+
+---
+
+# 3 dig -x gw_IP @ns2
+
+```
+$ dig -x 10.9.14.103 @10.9.14.109
+```
+
+![dig_x_109-gw](/teste/dig_x-109-gw.PNG)
+
+---
+
+# 4 dig -x smb_IP @ns2
+
+```
+$ dig -x 10.9.14.108 @10.9.14.109
+```
+
+![dig_x_109-smb](/teste/dig_x-109-smb.PNG)
+
+---
+
+# 5 dig -x www_IP @ns2
+
+```
+$ dig -x 10.9.14.217 @10.9.14.109
+```
+
+![dig_x_109-www](/teste/dig_x-109-www.PNG)
+
+---
+
+# 6 dig -x bd_IP @ns2
+
+```
+$ dig -x 10.9.14.218 @10.9.14.109
+```
+
+![dig_x_109-bd](/teste/dig_x-109-bd.PNG)
+
+---
+dig -x ns1_IP @ns2
+dig -x ns2_IP @ns2 
+dig -x gw_IP @ns2
+dig -x samba_IP @ns2
+dig -x www_IP @ns2
+dig -x bd_IP @ns2
+
+---x---
+
+nslookup ns1 ns2
+nslookup ns2 ns2
+nslookup gw ns2
+nslookup samba ns2
+nslookup www ns2
+nslookup bd ns2
+
+
+
+---
+nslookup ns1_IP ns1 
+nslookup ns2_IP ns1 
+nslookup gw_IP ns1
+nslookup samba_IP ns1
+nslookup www_IP ns1
+nslookup bd_IP ns1
+
+---
+
+ping ns1
+ping ns2
+ping gw
+ping www
+ping bd
+ping samba
+
+ping ns1_ip_ens192
+ping ns2_ip_ens192
+ping gw_ip_ens192
+ping www_ip_ens192
+ping bd_ip_ens192
+ping samba_ip_ens192
+
+manda os prints nos chats de cada grupo
