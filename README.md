@@ -21,7 +21,17 @@
 ---
 
 # Introdução
-Texto deintrodução
+
+ Nesse projeto vamos desenvolver um sistema de rede local, utilizando maquinaas virtuais com sistema operacinal Unbuto, conectados a ela via vpn.
+ Aqui vamos Fazer o pass a passo de intalação e configurações de servços
+ - Samba 
+  > Serviço de compartilhamento de arquivos entre linux e windowns
+ - Dns
+  > Serviço de resolução de nomes (criação de dominio ``grupo4.turma914.ifalara.local``
+ - Web
+  > Serviço LAMP (Linux Apache MySQL PHP)
+ - Gateway
+  > Firewall de entrada as outras máquinas
 
 # Definições Iniciais
 
@@ -1774,3 +1784,5 @@ $ sudo systemctl restart bind9
 
 
 # Considerações Finais
+
+Aqui conseguimos fazer a interação entre seis maquinas virtuais utilizando ferramentas 
